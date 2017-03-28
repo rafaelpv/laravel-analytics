@@ -336,6 +336,17 @@ class Analytics
         return $query['rows'];
     }
     
+    public function fetchRegionsActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers',
+            [
+                'dimensions' => 'rt:region'
+            ]
+        );
+
+        return $query['rows'];
+    }
+    
     public function fetchCitiesActiveUsers() {
         $query = $this->performQueryRealTime(
             'rt:activeUsers',
