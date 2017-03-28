@@ -150,7 +150,236 @@ class Analytics
                 'sessions' => $topBrowsers->splice($maxResults - 1)->sum('sessions'),
             ]);
     }
+    
+    public function fetchTopOperatingSystems(Period $period) {
+        $query = $this->performQuery(
+            $period, 
+            'ga:sessions',
+            [
+                'dimensions' => 'ga:operatingSystem',
+                'sort' => '-ga:sessions'
+            ]
+        );
+    
+        return collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'operatingSystem' => $dateRow[0],
+                'sessions' => (int) $dateRow[1]
+            ];
+        });
+    }
+    
+    public function fetchTopCountries(Period $period, int $maxResults = 10) {
+        $query = $this->performQuery(
+            $period, 
+            'ga:sessions',
+            [
+                'dimensions' => 'ga:country',
+                'sort' => '-ga:sessions'
+            ]
+        );
+    
+        $results = collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'country' => $dateRow[0],
+                'sessions' => (int) $dateRow[1]
+            ];
+        });
+        
+        if ($results->count() > $maxResults) {
+            $results = $results
+                ->take($maxResults - 1)
+                ->push([
+                    'country' => 'Others',
+                    'sessions' => $results->splice($maxResults - 1)->sum('sessions'),
+                ]);
+        }
+        
+        return $results;
+    }
+    
+    public function fetchTopCities(Period $period, int $maxResults = 10) {
+        $query = $this->performQuery(
+            $period, 
+            'ga:sessions',
+            [
+                'dimensions' => 'ga:city',
+                'sort' => '-ga:sessions'
+            ]
+        );
+                
+        $results = collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'city' => $dateRow[0],
+                'sessions' => (int) $dateRow[1]
+            ];
+        });
+        
+        if ($results->count() > $maxResults) {
+            $results = $results
+                ->take($maxResults - 1)
+                ->push([
+                    'city' => 'Others',
+                    'sessions' => $results->splice($maxResults - 1)->sum('sessions'),
+                ]);
+        }
+        
+        return $results;
+    }
 
+    public function fetchTopLanguages(Period $period, int $maxResults = 10) {
+        $query = $this->performQuery(
+            $period,
+            'ga:sessions',
+            [
+                'dimensions' => 'ga:language',
+                'sort' => '-ga:sessions'
+            ]
+            );
+    
+        $results = collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'language' => $dateRow[0],
+                'sessions' => (int) $dateRow[1]
+            ];
+        });
+    
+        if ($results->count() > $maxResults) {
+            $results = $results
+            ->take($maxResults - 1)
+            ->push([
+                'language' => 'Others',
+                'sessions' => $results->splice($maxResults - 1)->sum('sessions'),
+            ]);
+        }
+
+        return $results;
+    }
+
+    public function fetchTopTrafficSources(Period $period) {
+        $query = $this->performQuery(
+            $period,
+            'ga:sessions,ga:pageviews,ga:sessionDuration,ga:exits',
+            [
+                'dimensions' => 'ga:source,ga:medium',
+                'sort' => '-ga:sessions'
+            ]
+            );
+    
+        $results = collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'source' => $dateRow[0],
+                'sessions' => (int) $dateRow[2]
+            ];
+        });
+    
+        return $results;
+    }
+
+    public function fetchTopSearchEngines(Period $period) {
+        $query = $this->performQuery(
+            $period,
+            'ga:pageviews,ga:sessionDuration,ga:exits',
+            [
+                'dimensions' => 'ga:source',
+                'filters' => 'ga:medium==cpa,ga:medium==cpc,ga:medium==cpm,ga:medium==cpp,ga:medium==cpv,ga:medium==organic,ga:medium==ppc',
+                'sort' => '-ga:pageviews'
+            ]
+            );
+    
+        $results = collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'url' => $dateRow[0],
+                'sessions' => (int) $dateRow[1]
+            ];
+        });
+    
+        return $results;
+    }
+
+    public function fetchTopKeywords(Period $period) {
+        $query = $this->performQuery(
+            $period,
+            'ga:sessions',
+            [
+                'dimensions' => 'ga:keyword',
+                'sort' => '-ga:sessions'
+            ]
+            );
+    
+        $results = collect($query['rows'] ?? [])->map(function (array $dateRow) {
+            return [
+                'keyword' => $dateRow[0],
+                'sessions' => (int) $dateRow[1]
+            ];
+        });
+    
+        return $results;
+    }
+
+    public function fetchNumberActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers'
+        );
+    
+        return $query['rows'][0][0];
+    }
+    
+    public function fetchCountriesActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers',
+            [
+                'dimensions' => 'rt:country'
+            ]
+        );
+
+        return $query['rows'];
+    }
+    
+    public function fetchCitiesActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers',
+            [
+                'dimensions' => 'rt:city'
+            ]
+        );
+
+        return $query['rows'];
+    }
+    
+    public function fetchBrowsersActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers',
+            [
+                'dimensions' => 'rt:browser'
+            ]
+        );
+
+        return $query['rows'];
+    }
+    
+    public function fetchOperatingSystemActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers',
+            [
+                'dimensions' => 'rt:operatingSystem'
+            ]
+        );
+
+        return $query['rows'];
+    }
+    
+    public function fetchDeviceCategoryActiveUsers() {
+        $query = $this->performQueryRealTime(
+            'rt:activeUsers',
+            [
+                'dimensions' => 'rt:deviceCategory'
+            ]
+        );
+
+        return $query['rows'];
+    }
+    
     /**
      * Call the query method on the authenticated client.
      *
