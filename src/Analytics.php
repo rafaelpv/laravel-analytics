@@ -172,6 +172,23 @@ class Analytics
     }
 
     /**
+     * Call the realtime query method on the authenticated client.
+     *
+     * @param string $metrics
+     * @param array  $others
+     *
+     * @return array|null
+     */
+    public function performQueryRealTime(string $metrics, array $others = [])
+    {
+        return $this->client->performQueryRealTime(
+            $this->viewId,
+            $metrics,
+            $others
+        );
+    }
+
+    /**
      * Get the underlying Google_Service_Analytics object. You can use this
      * to basically call anything on the Google Analytics API.
      *

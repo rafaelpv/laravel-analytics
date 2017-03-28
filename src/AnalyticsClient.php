@@ -68,6 +68,24 @@ class AnalyticsClient
         });
     }
 
+    /**
+     * Query the realtime Google Analytics Service with given parameters.
+     *
+     * @param string    $viewId
+     * @param string    $metrics
+     * @param array     $others
+     *
+     * @return array|null
+     */
+    public function performQueryRealTime(string $viewId, string $metrics, array $others = [])
+    {
+        return $this->service->data_realtime->get(
+           "ga:{$viewId}",
+           $metrics,
+           $others
+       );
+    }
+
     public function getAnalyticsService(): Google_Service_Analytics
     {
         return $this->service;
